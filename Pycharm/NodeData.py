@@ -4,6 +4,9 @@ class NodeData:
         self.location = (0, 0)
         self.connections = []
 
+    def __str__(self):
+        return "Node[loc:" + str(self.location) + ",cons:" + str(len(self.connections)) + "]"
+
     def set_position(self, pos):
         self.location = pos
 
