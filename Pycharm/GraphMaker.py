@@ -27,8 +27,8 @@ class GraphMaker:
         count = FileInput.count
         nums = FileInput.numbers.copy()
         cons = nums[FileInput.count * 2 + 1:]
-        for f in range(7):
-            for t in range(7):
+        for f in range(count):
+            for t in range(count):
                 if cons[count * t + f] == 1:
                     link = Link()
                     link.set_ends(f, t)
