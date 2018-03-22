@@ -7,9 +7,6 @@ class GraphMaker:
 
     nodes = []
 
-    def __init__(self):
-        self.x = 1
-
     @staticmethod
     def build_nodes():
         nodes = []

@@ -48,8 +48,13 @@ class Solver:
             return
         print("Search results:")
         Solver.search(0)
-        print(Solver.visited_count)
-        print(Solver.path(len(Solver.solver_nodes)-1))
+        print(str(Solver.visited_count) + " visited")
+        path = Solver.path(len(Solver.solver_nodes)-1)
+        print(path)
+        coords = ""
+        for n in path:
+            coords += str(Solver.solver_nodes[n].get_node()) + "\n"
+        print(coords)
 
     @staticmethod
     def search(this_id):

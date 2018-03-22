@@ -13,7 +13,7 @@ class Node:
         Node.unique_id += 1
 
     def __str__(self):
-        return "ID:" + str(self.id) + "," + str(self.nodes[self.id])
+        return "ID:" + str(self.id + 1) + ", " + str(self.nodes[self.id])
 
     def set_position(self, pos):
         self.nodes[self.id].set_position(pos)

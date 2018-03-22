@@ -2,6 +2,8 @@ from FileInput import FileInput
 from Node import Node
 from GraphMaker import GraphMaker
 from Solver import Solver
+from tkinter import *
+import tkinter as tk
 
 # run program
 print("Hello world.")

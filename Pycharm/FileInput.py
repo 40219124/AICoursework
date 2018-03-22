@@ -16,7 +16,7 @@ class FileInput:
     @staticmethod
     def read_file():
         this_dir = os.path.dirname(__file__)
-        rel_path = "..\Caverns\input.cav"
+        rel_path = "..\Caverns\input2.cav"
         abs_path = os.path.join(this_dir, rel_path)
         with open(abs_path, 'r') as f:
             FileInput.file_data = f.read()
