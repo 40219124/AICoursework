@@ -26,5 +26,3 @@ Solver.generate_path()
 Solver.initialise_solver(GraphMaker.nodes)
 
 renderer = Renderer()
-
-Solver.generate_path()

@@ -29,17 +29,24 @@ class Solver:
     solver_nodes = []
     visited_count = 0
     visit_queue = []
+    solved = False
+
+    @staticmethod
+    def reset_solver():
+        Solver.solver_nodes.clear()
+        Solver.visited_count = 0
+        Solver.visit_queue = [(0, 0)]
+        Solver.solved = False
 
     @staticmethod
     def initialise_solver(nodes):
-        Solver.solver_nodes.clear()
+        Solver.reset_solver()
         for i in range(len(nodes)):
             sn = SolverNode()
             sn.set_node(i)
             Solver.solver_nodes.append(sn)
         Solver.solver_nodes[0].shortest_dist = 0
         Solver.solver_nodes[len(nodes) - 1].goal = True
-        Solver.visit_queue.append((0, 0))
 
     @staticmethod
     # Dijkstra
@@ -51,10 +58,9 @@ class Solver:
             return
         print("Search results:")
 
-        done = False
-        while not done:
+        while not Solver.solved:
             node_id = Solver.visit_queue[0][0]
-            done = Solver.search(node_id)
+            Solver.search_from_node(node_id)
             print(Solver.visit_queue)
             queue_length = len(Solver.visit_queue)
             if queue_length == 0:
@@ -71,13 +77,14 @@ class Solver:
 
     @staticmethod
     # Dijkstra
-    def search(this_id):
+    def search_from_node(this_id):
         Solver.visit_queue.pop(0)
         this_node = Solver.solver_nodes[this_id]
         Solver.visited_count += 1
         this_node.visited = True
         if this_node.goal:
-            return True
+            Solver.solved = True
+            return
         dests = Solver.order_closest_neighbours(this_id)
         for d in dests:
             weight = this_node.get_node().get_connection_to(d).length()
@@ -91,7 +98,7 @@ class Solver:
                 Solver.visit_queue.append((d, test_val))
                 Solver.visit_queue.sort(key=Solver.sort_by_second)
                 # Solver.search(d)
-        return False
+        Solver.solved = False
 
     @staticmethod
     def sort_by_second(pair):
