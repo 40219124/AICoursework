@@ -28,6 +28,7 @@ class Solver:
 
     solver_nodes = []
     visited_count = 0
+    visit_queue = []
 
     @staticmethod
     def initialise_solver(nodes):
@@ -38,8 +39,10 @@ class Solver:
             Solver.solver_nodes.append(sn)
         Solver.solver_nodes[0].shortest_dist = 0
         Solver.solver_nodes[len(nodes) - 1].goal = True
+        Solver.visit_queue.append((0, 0))
 
     @staticmethod
+    # Dijkstra
     def generate_path():
         if len(Solver.solver_nodes) == 0:
             Solver.initialise_solver(GraphMaker.nodes)
@@ -47,7 +50,17 @@ class Solver:
             print("No nodes. Aborting pathfinding.")
             return
         print("Search results:")
-        Solver.search(0)
+
+        done = False
+        while not done:
+            node_id = Solver.visit_queue[0][0]
+            done = Solver.search(node_id)
+            print(Solver.visit_queue)
+            queue_length = len(Solver.visit_queue)
+            if queue_length == 0:
+                print("Didn't find a path.")
+                break
+
         print(str(Solver.visited_count) + " visited")
         path = Solver.path(len(Solver.solver_nodes)-1)
         print(path)
@@ -57,42 +70,64 @@ class Solver:
         print(coords)
 
     @staticmethod
+    # Dijkstra
     def search(this_id):
+        Solver.visit_queue.pop(0)
         this_node = Solver.solver_nodes[this_id]
-        if this_node.goal:
-            return
         Solver.visited_count += 1
         this_node.visited = True
+        if this_node.goal:
+            return True
         dests = Solver.order_closest_neighbours(this_id)
         for d in dests:
             weight = this_node.get_node().get_connection_to(d).length()
             test_val = this_node.shortest_dist + weight
             if Solver.solver_nodes[d].shortest_dist == -1 \
                     or test_val < Solver.solver_nodes[d].shortest_dist:
+                if Solver.solver_nodes[d].shortest_dist != -1:
+                    Solver.visit_queue.remove((d, Solver.solver_nodes[d].shortest_dist))
                 Solver.solver_nodes[d].shortest_dist = test_val
                 Solver.solver_nodes[d].visited_from = this_id
-                Solver.search(d)
+                Solver.visit_queue.append((d, test_val))
+                Solver.visit_queue.sort(key=Solver.sort_by_second)
+                # Solver.search(d)
+        return False
 
     @staticmethod
+    def sort_by_second(pair):
+        return pair[1]
+
+    @staticmethod
+    # Dijkstra
     def order_closest_neighbours(root):
         cons = GraphMaker.nodes[root].get_destinations()
         for c in cons:
             if Solver.solver_nodes[c].visited:
                 cons.remove(c)
-        dests = []
+
+        pairs = []
         while len(cons) > 0:
-            shortest = 9999999
-            short_id = -1
-            for i in range(len(cons)):
-                test_len = GraphMaker.nodes[root].get_connection_to(cons[i]).length()
-                if test_len < shortest:
-                    shortest = test_len
-                    short_id = i
-            dests.append(cons[short_id])
-            cons.pop(short_id)
+            key = cons.pop()
+            pairs.append((key, GraphMaker.nodes[root].get_connection_to(key).length()))
+        pairs.sort(key=Solver.sort_by_second)
+
+        dests = []
+        while len(pairs) > 0:
+            dests.append(pairs.pop(0)[0])
+        # while len(cons) > 0:
+        #     shortest = 9999999
+        #     short_id = -1
+        #     for i in range(len(cons)):
+        #         test_len = GraphMaker.nodes[root].get_connection_to(cons[i]).length()
+        #         if test_len < shortest:
+        #             shortest = test_len
+        #             short_id = i
+        #     dests.append(cons[short_id])
+        #     cons.pop(short_id)
         return dests
 
     @staticmethod
+    # A star
     def order_weighted(root):
         x = root
         x += 1
