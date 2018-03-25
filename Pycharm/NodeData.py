@@ -2,7 +2,7 @@ class NodeData:
 
     def __init__(self):
         self.location = (0, 0)
-        self.connections = []
+        self.connections = []  # List of links
 
     def __str__(self):
         return "Node[loc:" + str(self.location) + ",cons:" + str(len(self.connections)) + "]"

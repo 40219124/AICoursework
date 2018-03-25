@@ -5,7 +5,7 @@ from NodeData import NodeData
 class Node:
 
     unique_id = 0
-    nodes = []
+    nodes = []  # list of node data
 
     def __init__(self):
         self.nodes.append(NodeData())
