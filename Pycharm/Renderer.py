@@ -25,7 +25,7 @@ class Renderer:
         greenbutton = Button(bottomframe, text="Green", fg="green")
         greenbutton.pack(side=TOP)
 
-        blackbutton = Button(bottomframe, text="Black", fg="black", command=Solver.generate_path)
+        blackbutton = Button(bottomframe, text="Black", fg="black", command=Solver.generate_by_step)
         blackbutton.pack(side=BOTTOM)
 
         self.window.mainloop()

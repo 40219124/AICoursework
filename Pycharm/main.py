@@ -7,7 +7,7 @@ from Renderer import Renderer
 # run program
 print("Hello world.")
 
-fi = FileInput.do_file_input(2)
+fi = FileInput.do_file_input(3)
 GraphMaker.build_nodes()
 GraphMaker.build_connections()
 for n in GraphMaker.nodes:

@@ -26,6 +26,7 @@ class SolverNode:
 
 class Solver:
 
+    ready = False
     solver_nodes = []
     visited_count = 0
     visit_queue = []
@@ -37,6 +38,7 @@ class Solver:
         Solver.visited_count = 0
         Solver.visit_queue = [(0, 0)]
         Solver.solved = False
+        Solver.ready = False
 
     @staticmethod
     def initialise_solver(nodes):
@@ -47,11 +49,12 @@ class Solver:
             Solver.solver_nodes.append(sn)
         Solver.solver_nodes[0].shortest_dist = 0
         Solver.solver_nodes[len(nodes) - 1].goal = True
+        Solver.ready = True
 
     @staticmethod
     # Dijkstra
     def generate_path():
-        if len(Solver.solver_nodes) == 0:
+        if not Solver.ready:
             Solver.initialise_solver(GraphMaker.nodes)
         if len(Solver.solver_nodes) == 0:
             print("No nodes. Aborting pathfinding.")
@@ -76,7 +79,16 @@ class Solver:
         print(coords)
 
     @staticmethod
-    # Dijkstra
+    def generate_by_step():
+        if not Solver.ready:
+            Solver.initialise_solver(GraphMaker.nodes)
+        if not Solver.solved:
+            Solver.search_from_node(Solver.visit_queue[0][0])
+        else:
+            print(Solver.path(len(Solver.solver_nodes) - 1))
+
+    @staticmethod
+    # Dijkstra method of node searching
     def search_from_node(this_id):
         Solver.visit_queue.pop(0)
         this_node = Solver.solver_nodes[this_id]
@@ -105,7 +117,7 @@ class Solver:
         return pair[1]
 
     @staticmethod
-    # Dijkstra
+    # Dijkstra method of neighbour sorting
     def order_closest_neighbours(root):
         cons = GraphMaker.nodes[root].get_destinations()
         for c in cons:
@@ -134,7 +146,7 @@ class Solver:
         return dests
 
     @staticmethod
-    # A star
+    # A star method of neighbour sorting
     def order_weighted(root):
         x = root
         x += 1
@@ -160,6 +172,7 @@ class Solver:
         return dests
 
     @staticmethod
+    # return the list of nodes from start to finish
     def path(goal):
         nodes = []
         flag = True
