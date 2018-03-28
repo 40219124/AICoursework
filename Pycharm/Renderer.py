@@ -35,6 +35,8 @@ class Renderer:
     width = 0
     height = 0
     window = Tk()
+    canvas = -1
+    selected = -1
 
     def __init__(self):
         min_x = 9999999
@@ -42,9 +44,11 @@ class Renderer:
         min_y = 9999999
         max_y = -9999999
         for i in range(len(Solver.solver_nodes)):
+            # Make the new render node
             rn = RenderNode()
             rn.id = i
             rn.loc = Solver.solver_nodes[i].get_node().get_position()
+            # To calculate screen details
             if rn.loc[0] < min_x:
                 min_x = rn.loc[0]
             if rn.loc[0] > max_x:
@@ -54,51 +58,66 @@ class Renderer:
             if rn.loc[1] > max_y:
                 max_y = rn.loc[1]
             Renderer.render_nodes.append(rn)
+        # Save screen details
         Renderer.min_x = 1 - min_x
         Renderer.min_y = 1 - min_y
         Renderer.width = max_x - min_x + 2
         Renderer.height = max_y - min_y + 2
+        # Start node
         Renderer.render_nodes[0].start = True
+        Renderer.render_nodes[0].selected = True
+        Renderer.render_nodes[0].visited = True
+        Renderer.render_nodes[0].examined = True
+        Renderer.selected = 0
+        # Goal node
         Renderer.render_nodes[len(Renderer.render_nodes) - 1].goal = True
 
+        # Window set up
         Renderer.window.title("Hey!")
         Renderer.window.geometry(str(Renderer.width * Renderer.scale + 100) + "x" +
                                  str(Renderer.height * Renderer.scale + 100))
-
-        frame = Frame(Renderer.window)
-        frame.pack()
-
+        # Button frame set up
         bottomframe = Frame(Renderer.window)
         bottomframe.pack(side=BOTTOM)
-
-        redbutton = Button(bottomframe, text="Red", fg="red")
-        redbutton.pack(side=RIGHT)
-
-        bluebutton = Button(bottomframe, text="Blue", fg="blue")
-        bluebutton.pack(side=LEFT)
-
-        greenbutton = Button(bottomframe, text="Green", fg="green")
-        greenbutton.pack(side=TOP)
-
+        # Button for stepping
         blackbutton = Button(bottomframe, text="Black", fg="black", command=Renderer.do_step)
         blackbutton.pack(side=BOTTOM)
+        # Canvas set up
+        Renderer.canvas = Canvas(Renderer.window, width=Renderer.width * Renderer.scale,
+                                 height=Renderer.height * Renderer.scale)
+        Renderer.canvas.pack(side=TOP)
+        # Draw on canvas
+        for node in Renderer.render_nodes:
+            Renderer.draw_node(Renderer.canvas, node)
 
+        # Main loop
         Renderer.window.mainloop()
 
     @staticmethod
     def do_step():
-        if len(Renderer.inspected) > 0:
-            Renderer.render_nodes[Renderer.inspected[0]].visited = True
         Solver.generate_by_step()
-        queue = Solver.visit_queue
-        for pair in queue:
-            if pair[0] not in Renderer.inspected:
-                Renderer.render_nodes[pair[0]].examined = True
-                Renderer.inspected.append(pair[0])
-        c = Canvas(Renderer.window, width=Renderer.width * Renderer.scale, height=Renderer.height * Renderer.scale)
-        c.pack(side=TOP)
+        if Renderer.selected != -1:
+            Renderer.render_nodes[Renderer.selected].selected = False
+            Renderer.selected = -1
+        if not Solver.solved:
+            if len(Renderer.inspected) > 0:
+                sel = Renderer.inspected.pop(0)
+                Renderer.selected = sel
+                Renderer.render_nodes[sel].visited = True
+                Renderer.render_nodes[sel].selected = True
+            queue = Solver.visit_queue
+            new_inspects = []
+            for pair in queue:
+                new_inspects.append(pair[0])
+                if pair[0] not in Renderer.inspected:
+                    Renderer.render_nodes[pair[0]].examined = True
+                    Renderer.inspected.append(pair[0])
+            Renderer.inspected = new_inspects
+        else:
+            Renderer.render_nodes[len(Renderer.render_nodes) - 1].visited = True
+            Renderer.render_nodes[len(Renderer.render_nodes) - 1].selected = True
         for node in Renderer.render_nodes:
-            Renderer.draw_node(c, node)
+            Renderer.draw_node(Renderer.canvas, node)
 
     @staticmethod
     def draw_node(canvas, render_node):
@@ -114,6 +133,12 @@ class Renderer:
         if render_node.selected:
             canvas.itemconfig(render_node.oval, fill="#ff8c1a")
         if render_node.start:
-            canvas.itemconfig(render_node.oval, fill="#2eb82e")
+            if render_node.selected:
+                canvas.itemconfig(render_node.oval, fill="#66ff66")
+            else:
+                canvas.itemconfig(render_node.oval, fill="#2eb82e")
         if render_node.goal:
-            canvas.itemconfig(render_node.oval, fill="#cc0000")
+            if render_node.selected:
+                canvas.itemconfig(render_node.oval, fill="#ff3311")
+            else:
+                canvas.itemconfig(render_node.oval, fill="#cc0000")
