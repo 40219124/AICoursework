@@ -31,6 +31,7 @@ class Solver:
     visited_count = 0
     visit_queue = []
     solved = False
+    saved_path = []
 
     @staticmethod
     def reset_solver():
@@ -39,9 +40,11 @@ class Solver:
         Solver.visit_queue = [(0, 0)]
         Solver.solved = False
         Solver.ready = False
+        Solver.saved_path.clear()
 
     @staticmethod
-    def initialise_solver(nodes):
+    def initialise_solver():
+        nodes = GraphMaker.nodes
         Solver.reset_solver()
         for i in range(len(nodes)):
             sn = SolverNode()
@@ -52,10 +55,10 @@ class Solver:
         Solver.ready = True
 
     @staticmethod
-    # Dijkstra
+    # Dijkstra all in one
     def generate_path():
         if not Solver.ready:
-            Solver.initialise_solver(GraphMaker.nodes)
+            Solver.initialise_solver()
         if len(Solver.solver_nodes) == 0:
             print("No nodes. Aborting pathfinding.")
             return
@@ -71,7 +74,7 @@ class Solver:
                 break
 
         print(str(Solver.visited_count) + " visited")
-        path = Solver.path(len(Solver.solver_nodes)-1)
+        path = Solver.get_path()
         print(path)
         coords = ""
         for n in path:
@@ -79,13 +82,14 @@ class Solver:
         print(coords)
 
     @staticmethod
+    # Step by step method for dijkstra
     def generate_by_step():
         if not Solver.ready:
-            Solver.initialise_solver(GraphMaker.nodes)
+            Solver.initialise_solver()
         if not Solver.solved:
             Solver.search_from_node(Solver.visit_queue[0][0])
         else:
-            print(Solver.path(len(Solver.solver_nodes) - 1))
+            print(Solver.get_path())
 
     @staticmethod
     # Dijkstra method of node searching
@@ -173,16 +177,18 @@ class Solver:
 
     @staticmethod
     # return the list of nodes from start to finish
-    def path(goal):
-        nodes = []
-        flag = True
-        current_id = goal
-        if Solver.solver_nodes[current_id].previous() == -1:
-            return "No valid solution found."
-        while flag:
-            if current_id == -1:
-                flag = False
-            else:
-                nodes.insert(0, current_id)
-                current_id = Solver.solver_nodes[current_id].previous()
-        return nodes
+    def get_path():
+        if len(Solver.saved_path) == 0:
+            nodes = []
+            flag = True
+            current_id = len(Solver.solver_nodes) - 1
+            if Solver.solver_nodes[current_id].previous() == -1:
+                return "No valid solution found."
+            while flag:
+                if current_id == -1:
+                    flag = False
+                else:
+                    nodes.insert(0, current_id)
+                    current_id = Solver.solver_nodes[current_id].previous()
+            Solver.saved_path = nodes
+        return Solver.saved_path

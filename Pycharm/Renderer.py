@@ -39,6 +39,8 @@ class Renderer:
     selected = -1
 
     def __init__(self):
+        if not Solver.ready:
+            Solver.initialise_solver()
         min_x = 9999999
         max_x = -9999999
         min_y = 9999999
@@ -79,19 +81,31 @@ class Renderer:
         # Button frame set up
         bottomframe = Frame(Renderer.window)
         bottomframe.pack(side=BOTTOM)
+        # Button for all
+        all_button = Button(bottomframe, text="All", fg="black", command=Renderer.do_all)
+        all_button.pack(side=TOP)
         # Button for stepping
-        blackbutton = Button(bottomframe, text="Black", fg="black", command=Renderer.do_step)
-        blackbutton.pack(side=BOTTOM)
+        step_button = Button(bottomframe, text="Step", fg="black", command=Renderer.do_step)
+        step_button.pack(side=BOTTOM)
         # Canvas set up
         Renderer.canvas = Canvas(Renderer.window, width=Renderer.width * Renderer.scale,
                                  height=Renderer.height * Renderer.scale)
         Renderer.canvas.pack(side=TOP)
         # Draw on canvas
         for node in Renderer.render_nodes:
+            for link in node.get_solver_node().get_node().get_links():
+                Renderer.draw_links(Renderer.canvas, link)
+        for node in Renderer.render_nodes:
             Renderer.draw_node(Renderer.canvas, node)
 
         # Main loop
         Renderer.window.mainloop()
+
+    @staticmethod
+    def do_all():
+        while not Solver.solved:
+            Renderer.do_step()
+        # Renderer.do_step()
 
     @staticmethod
     def do_step():
@@ -116,6 +130,8 @@ class Renderer:
         else:
             Renderer.render_nodes[len(Renderer.render_nodes) - 1].visited = True
             Renderer.render_nodes[len(Renderer.render_nodes) - 1].selected = True
+            for node_id in Solver.get_path():
+                Renderer.render_nodes[node_id].selected = True
         for node in Renderer.render_nodes:
             Renderer.draw_node(Renderer.canvas, node)
 
@@ -142,3 +158,28 @@ class Renderer:
                 canvas.itemconfig(render_node.oval, fill="#ff3311")
             else:
                 canvas.itemconfig(render_node.oval, fill="#cc0000")
+
+    @staticmethod
+    def draw_links(canvas, link):
+        start = list(Solver.solver_nodes[link.start].get_node().get_position())
+        start[0] = (start[0] + Renderer.min_x) * Renderer.scale
+        start[1] = (Renderer.height - (start[1] + Renderer.min_y)) * Renderer.scale
+        end = list(Solver.solver_nodes[link.end].get_node().get_position())
+        end[0] = (end[0] + Renderer.min_x) * Renderer.scale
+        end[1] = (Renderer.height - (end[1] + Renderer.min_y)) * Renderer.scale
+        start, end = Renderer.arrow_reduction(start, end)
+
+        canvas.create_line(start[0], start[1], end[0], end[1], arrow=LAST)
+
+    @staticmethod
+    def arrow_reduction(start, end):
+        direction = [end[0] - start[0], end[1] - start[1]]
+        direction = Renderer.normalise(direction)
+        start = [start[0] + direction[0] * 5, start[1] + direction[1] * 5]
+        end = [end[0] - direction[0] * 5, end[1] - direction[1] * 5]
+        return start, end
+
+    @staticmethod
+    def normalise(vec):
+        length = (vec[0] ** 2 + vec[1] ** 2)**(1/2)
+        return [vec[0]/length, vec[1]/length]

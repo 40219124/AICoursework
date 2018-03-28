@@ -20,9 +20,9 @@ for n in GraphMaker.nodes:
 # n2.set_position((4, 3))
 # print(str(n2))
 
-Solver.initialise_solver(GraphMaker.nodes)
-Solver.generate_path()
-
-Solver.initialise_solver(GraphMaker.nodes)
+# Solver.initialise_solver(GraphMaker.nodes)
+# Solver.generate_path()
+#
+# Solver.initialise_solver(GraphMaker.nodes)
 
 renderer = Renderer()
