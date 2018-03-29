@@ -16,7 +16,7 @@ class GraphMaker:
             n = Node()
             n.set_position((nums.pop(0), nums.pop(0)))
             nodes.append(n)
-            print(str(n))
+            # print(str(n))
         GraphMaker.nodes = nodes.copy()
 
     @staticmethod

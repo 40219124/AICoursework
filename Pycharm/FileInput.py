@@ -26,6 +26,7 @@ class FileInput:
         else:
             rel_path += "..\Caverns\input.cav"
         abs_path = os.path.join(this_dir, rel_path)
+        print("Looking for file at: " + abs_path)
         with open(abs_path, 'r') as f:
             FileInput.file_data = f.read()
 

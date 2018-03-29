@@ -5,13 +5,13 @@ from Solver import Solver
 from Renderer import Renderer
 
 # run program
-print("Hello world.")
+# print("Hello world.")
 
 fi = FileInput.do_file_input(4)
 GraphMaker.build_nodes()
 GraphMaker.build_connections()
-for n in GraphMaker.nodes:
-    print(str(n))
+# for n in GraphMaker.nodes:
+#     print(str(n))
 
 # n = Node()
 # n.set_position((1, 2))
