@@ -184,9 +184,9 @@ class Renderer:
 
     @staticmethod
     def do_all():
-        while not Solver.solved:
+        while not Solver.solved and not Solver.unsolvable:
             Renderer.do_step()
-        # Renderer.do_step()
+        Renderer.do_step()
 
     @staticmethod
     def do_step():
@@ -195,20 +195,27 @@ class Renderer:
             Renderer.render_nodes[Renderer.selected].selected = False
             Renderer.selected = -1
         if not Solver.solved:
-            if len(Renderer.inspected) > 0:
-                sel = Renderer.inspected.pop(0)
-                Renderer.selected = sel
-                Renderer.render_nodes[sel].visited = True
-                Renderer.render_nodes[sel].selected = True
-            queue = Solver.visit_queue
-            new_inspects = []
-            for pair in queue:
-                new_inspects.append(pair[0])
-                if pair[0] not in Renderer.inspected:
-                    Renderer.render_nodes[pair[0]].examined = True
-                    Renderer.inspected.append(pair[0])
-            Renderer.print_labels(queue)
-            Renderer.inspected = new_inspects
+            if not Solver.unsolvable:
+                if len(Renderer.inspected) > 0:
+                    sel = Renderer.inspected.pop(0)
+                    Renderer.selected = sel
+                    Renderer.render_nodes[sel].visited = True
+                    Renderer.render_nodes[sel].selected = True
+                queue = Solver.visit_queue
+                new_inspects = []
+                for pair in queue:
+                    new_inspects.append(pair[0])
+                    if pair[0] not in Renderer.inspected:
+                        Renderer.render_nodes[pair[0]].examined = True
+                        Renderer.inspected.append(pair[0])
+                Renderer.print_labels(queue)
+                Renderer.inspected = new_inspects
+            else:
+                Renderer.labels[0].config(text="FINISHED")
+                Renderer.labels[1].config(text="Graph is")
+                Renderer.labels[2].config(text=" unsolvable.")
+                Renderer.labels[3].config(text="")
+                Renderer.labels[4].config(text="")
         else:
             Renderer.render_nodes[len(Renderer.render_nodes) - 1].visited = True
             Renderer.render_nodes[len(Renderer.render_nodes) - 1].selected = True

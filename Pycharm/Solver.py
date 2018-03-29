@@ -31,6 +31,7 @@ class Solver:
     visited_count = 0
     visit_queue = []
     solved = False
+    unsolvable = False
     saved_path = []
     distance = -1
 
@@ -40,6 +41,7 @@ class Solver:
         Solver.visited_count = 0
         Solver.visit_queue = [(0, 0)]
         Solver.solved = False
+        Solver.unsolvable = False
         Solver.ready = False
         Solver.saved_path.clear()
         Solver.distance = -1
@@ -89,7 +91,11 @@ class Solver:
         if not Solver.ready:
             Solver.initialise_solver()
         if not Solver.solved:
-            Solver.search_from_node(Solver.visit_queue[0][0])
+            if len(Solver.visit_queue) == 0:
+                Solver.unsolvable = True
+                print("No possible route.")
+            else:
+                Solver.search_from_node(Solver.visit_queue[0][0])
         else:
             print(Solver.get_path())
 
