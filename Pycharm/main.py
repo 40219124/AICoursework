@@ -1,13 +1,12 @@
+import os
 from FileInput import FileInput
-from Node import Node
 from GraphMaker import GraphMaker
-from Solver import Solver
 from Renderer import Renderer
 
 # run program
 # print("Hello world.")
-
-fi = FileInput.do_file_input(4)
+this_dir = os.path.dirname(os.path.realpath(__file__))
+fi = FileInput.do_file_input(this_dir, 4)
 GraphMaker.build_nodes()
 GraphMaker.build_connections()
 # for n in GraphMaker.nodes:

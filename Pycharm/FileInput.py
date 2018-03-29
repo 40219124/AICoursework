@@ -8,14 +8,13 @@ class FileInput:
     numbers = []
 
     @staticmethod
-    def do_file_input(file_no):
-        FileInput.read_file(file_no)
+    def do_file_input(this_dir, file_no):
+        FileInput.read_file(this_dir, file_no)
         FileInput.process_data()
         FileInput.print_file()
 
     @staticmethod
-    def read_file(file_number):
-        this_dir = os.path.dirname(__file__)
+    def read_file(this_dir, file_number):
         rel_path = ""
         if file_number == 1:
             rel_path += "..\Caverns\input1.cav"
