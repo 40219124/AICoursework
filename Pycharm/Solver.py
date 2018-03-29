@@ -159,32 +159,6 @@ class Solver:
         return dests
 
     @staticmethod
-    # A star method of neighbour sorting
-    def order_weighted(root):
-        x = root
-        x += 1
-        root_node = Solver.solver_nodes[root].get_node()
-        cons = root_node.get_destinations()
-        for c in cons:
-            if Solver.solver_nodes[c].visited:
-                cons.remove(c)
-        dests = []
-        while len(cons) > 0:
-            lowest = 9999999
-            low_id = -1
-            for i in range(len(cons)):
-                value = root_node.get_connection_to(cons[i]).length()
-                value += GraphMaker.calculate_link_length(
-                    Solver.solver_nodes[cons[i]].get_node().get_position(),
-                    Solver.solver_nodes[len(Solver.solver_nodes) - 1].get_node().get_position())
-                if value < lowest:
-                    lowest = value
-                    low_id = i
-            dests.insert(0, cons[low_id])
-            cons.pop(low_id)
-        return dests
-
-    @staticmethod
     # return the list of nodes from start to finish
     def get_path():
         if len(Solver.saved_path) == 0:
