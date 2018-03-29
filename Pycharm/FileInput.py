@@ -21,8 +21,10 @@ class FileInput:
             rel_path += "..\Caverns\input1.cav"
         elif file_number == 2:
             rel_path += "..\Caverns\input2.cav"
-        else:
+        elif file_number == 3:
             rel_path += "..\Caverns\input3.cav"
+        else:
+            rel_path += "..\Caverns\input.cav"
         abs_path = os.path.join(this_dir, rel_path)
         with open(abs_path, 'r') as f:
             FileInput.file_data = f.read()

@@ -40,9 +40,12 @@ class Renderer:
     canvas = -1
     queue_frame = -1
     labels = []
+    key_canvas = -1
+    label_route = -1
 
     @staticmethod
     def reset():
+        Renderer.scale = 20
         # Reset trackers
         Renderer.inspected = []
         Renderer.selected = 0
@@ -57,6 +60,7 @@ class Renderer:
         # Reset labels
         for i in range(5):
             Renderer.labels[i].config(text="")
+        Renderer.key_canvas.itemconfig(Renderer.label_route, text="Selected")
         Solver.initialise_solver()
         Renderer.draw_nodes()
 
@@ -88,6 +92,8 @@ class Renderer:
         Renderer.min_y = 1 - min_y
         Renderer.width = max_x - min_x + 2
         Renderer.height = max_y - min_y + 2
+        if Renderer.width < 4 or Renderer.height < 4:
+            Renderer.scale = 60
         # Start node
         Renderer.render_nodes[0].start = True
         Renderer.render_nodes[0].selected = True
@@ -99,49 +105,73 @@ class Renderer:
 
         # Window set up
         Renderer.window.title("Graph Solver")
-        Renderer.window.geometry(str(Renderer.width * Renderer.scale + 200) + "x" +
+        Renderer.window.geometry(str(Renderer.width * Renderer.scale + 270) + "x" +
                                  str(Renderer.height * Renderer.scale + 100))
 
         # Queue frame set up
         queue_frame = Frame(Renderer.window)
-        queue_frame.pack(side=RIGHT)
+        queue_frame.grid(column=3, row=0)
 
         queue_header = Label(queue_frame, text="Dijkstra queue:")
-        queue_header.pack(side=TOP)
-        # queue_header.insert(INSERT, "Dijkstra queue")
+        queue_header.grid(row=0, sticky=N+W)
         l1 = Label(queue_frame)
-        l1.pack(side=TOP)
+        l1.grid(row=1, sticky=W)
         Renderer.labels.append(l1)
         l2 = Label(queue_frame)
-        l2.pack(side=TOP)
+        l2.grid(row=2, sticky=W)
         Renderer.labels.append(l2)
         l3 = Label(queue_frame)
-        l3.pack(side=TOP)
+        l3.grid(row=3, sticky=W)
         Renderer.labels.append(l3)
         l4 = Label(queue_frame)
-        l4.pack(side=TOP)
+        l4.grid(row=4, sticky=W)
         Renderer.labels.append(l4)
         l5 = Label(queue_frame)
-        l5.pack(side=TOP)
+        l5.grid(row=5, sticky=W)
         Renderer.labels.append(l5)
 
         # Button frame set up
         bottomframe = Frame(Renderer.window)
-        bottomframe.pack(side=BOTTOM)
+        bottomframe.grid(column=2, row=2)
         # Button for reset
-        reset_button = Button(bottomframe, text="Reset", fg="black", command=Renderer.reset)
-        reset_button.pack(side=BOTTOM)
+        reset_button = Button(Renderer.window, text="Reset", fg="black", command=Renderer.reset)
+        reset_button.grid(column=3, row=2, sticky=N+W)
         # Button for all
-        all_button = Button(bottomframe, text="All", fg="black", command=Renderer.do_all)
-        all_button.pack(side=BOTTOM)
+        all_button = Button(bottomframe, text="Jump to end", fg="black", command=Renderer.do_all)
+        all_button.pack(side=RIGHT, fill=X)
         # Button for stepping
-        step_button = Button(bottomframe, text="Step", fg="black", command=Renderer.do_step)
-        step_button.pack(side=BOTTOM)
+        step_button = Button(bottomframe, text="Step forward", fg="black", command=Renderer.do_step)
+        step_button.pack(side=LEFT, fill=X)
 
         # Canvas set up
         Renderer.canvas = Canvas(Renderer.window, width=Renderer.width * Renderer.scale,
                                  height=Renderer.height * Renderer.scale)
-        Renderer.canvas.pack(side=TOP)
+        Renderer.canvas.grid(column=1, row=0, columnspan=2, rowspan=2)
+
+        # Key set up
+        key = Canvas(Renderer.window, width=100, height=Renderer.height * Renderer.scale)
+        key.grid(column=0, row=0, rowspan=2)
+        Renderer.key_canvas = key
+
+        key.create_text(4, 13, anchor=W, text="Key:")
+
+        y_val = 25
+        space = 5
+        key.create_oval(3, y_val, 23, y_val + 20, fill="#2eb82e")
+        key.create_text(28, y_val + 10, anchor=W, text="Start")
+        y_val += 20 + space
+        key.create_oval(3, y_val, 23, y_val + 20, fill="#cc0000")
+        key.create_text(28, y_val + 10, anchor=W, text="Goal")
+        y_val += 20 + space
+        key.create_oval(3, y_val, 23, y_val + 20, fill="#ff8c1a")
+        Renderer.label_route = key.create_text(28, y_val + 10, anchor=W, text="Selected")
+        y_val += 20 + space
+        key.create_oval(3, y_val, 23, y_val + 20, fill="#0044cc")
+        key.create_text(28, y_val + 10, anchor=W, text="Visited")
+        y_val += 20 + space
+        key.create_oval(3, y_val, 23, y_val + 20, fill="#66c2ff")
+        key.create_text(28, y_val + 10, anchor=W, text="Examined")
+
         # Draw on canvas
         for node in Renderer.render_nodes:
             for link in node.get_solver_node().get_node().get_links():
@@ -188,7 +218,8 @@ class Renderer:
             Renderer.labels[1].config(text="Total distance:")
             Renderer.labels[2].config(text=str(round(Solver.distance, 2)))
             Renderer.labels[3].config(text="")
-            Renderer.labels[3].config(text="")
+            Renderer.labels[4].config(text="")
+            Renderer.key_canvas.itemconfig(Renderer.label_route, text="Route")
         Renderer.draw_nodes()
 
     @staticmethod
@@ -198,7 +229,6 @@ class Renderer:
 
     @staticmethod
     def draw_node(canvas, render_node):
-        assert type(render_node) is RenderNode, "not a render node"
         rad = Renderer.oval_radius
         if render_node.oval == -1:
             x = (render_node.loc[0] + Renderer.min_x) * Renderer.scale
