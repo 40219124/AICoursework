@@ -275,12 +275,15 @@ class Renderer:
 
     @staticmethod
     def print_labels(queue):
-        for i in range(5):
+        list_length = 5
+        for i in range(list_length):
             if i >= len(queue):
                 Renderer.labels[i].config(text="")
             else:
                 lab = "Node: " + str(queue[i][0] + 1) + ", Distance: " + str(round(queue[i][1], 2))
                 Renderer.labels[i].config(text=lab)
+        if len(queue) > list_length:
+            Renderer.labels[list_length - 1].config(text="+" + str(len(queue) - (list_length - 1)) + " more...")
 
 
     @staticmethod
