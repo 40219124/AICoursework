@@ -32,6 +32,7 @@ class Solver:
     visit_queue = []
     solved = False
     saved_path = []
+    distance = -1
 
     @staticmethod
     def reset_solver():
@@ -41,6 +42,7 @@ class Solver:
         Solver.solved = False
         Solver.ready = False
         Solver.saved_path.clear()
+        Solver.distance = -1
 
     @staticmethod
     def initialise_solver():
@@ -100,6 +102,7 @@ class Solver:
         this_node.visited = True
         if this_node.goal:
             Solver.solved = True
+            Solver.distance = this_node.shortest_dist
             return
         dests = Solver.order_closest_neighbours(this_id)
         for d in dests:

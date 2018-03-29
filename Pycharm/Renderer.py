@@ -28,17 +28,40 @@ class RenderNode:
 class Renderer:
 
     scale = 20
+    oval_radius = 10
     render_nodes = []
     inspected = []
+    selected = -1
     min_x = 0
     min_y = 0
     width = 0
     height = 0
     window = Tk()
     canvas = -1
-    selected = -1
+    queue_frame = -1
+    labels = []
 
-    def __init__(self):
+    @staticmethod
+    def reset():
+        # Reset trackers
+        Renderer.inspected = []
+        Renderer.selected = 0
+        # Reset render nodes
+        for rn in Renderer.render_nodes:
+            rn.selected = False
+            rn.visited = False
+            rn.examined = False
+        Renderer.render_nodes[0].selected = True
+        Renderer.render_nodes[0].visited = True
+        Renderer.render_nodes[0].examined = True
+        # Reset labels
+        for i in range(5):
+            Renderer.labels[i].config(text="")
+        Solver.initialise_solver()
+        Renderer.draw_nodes()
+
+    @staticmethod
+    def render_graph():
         if not Solver.ready:
             Solver.initialise_solver()
         min_x = 9999999
@@ -75,18 +98,46 @@ class Renderer:
         Renderer.render_nodes[len(Renderer.render_nodes) - 1].goal = True
 
         # Window set up
-        Renderer.window.title("Hey!")
-        Renderer.window.geometry(str(Renderer.width * Renderer.scale + 100) + "x" +
+        Renderer.window.title("Graph Solver")
+        Renderer.window.geometry(str(Renderer.width * Renderer.scale + 200) + "x" +
                                  str(Renderer.height * Renderer.scale + 100))
+
+        # Queue frame set up
+        queue_frame = Frame(Renderer.window)
+        queue_frame.pack(side=RIGHT)
+
+        queue_header = Label(queue_frame, text="Dijkstra queue:")
+        queue_header.pack(side=TOP)
+        # queue_header.insert(INSERT, "Dijkstra queue")
+        l1 = Label(queue_frame)
+        l1.pack(side=TOP)
+        Renderer.labels.append(l1)
+        l2 = Label(queue_frame)
+        l2.pack(side=TOP)
+        Renderer.labels.append(l2)
+        l3 = Label(queue_frame)
+        l3.pack(side=TOP)
+        Renderer.labels.append(l3)
+        l4 = Label(queue_frame)
+        l4.pack(side=TOP)
+        Renderer.labels.append(l4)
+        l5 = Label(queue_frame)
+        l5.pack(side=TOP)
+        Renderer.labels.append(l5)
+
         # Button frame set up
         bottomframe = Frame(Renderer.window)
         bottomframe.pack(side=BOTTOM)
+        # Button for reset
+        reset_button = Button(bottomframe, text="Reset", fg="black", command=Renderer.reset)
+        reset_button.pack(side=BOTTOM)
         # Button for all
         all_button = Button(bottomframe, text="All", fg="black", command=Renderer.do_all)
-        all_button.pack(side=TOP)
+        all_button.pack(side=BOTTOM)
         # Button for stepping
         step_button = Button(bottomframe, text="Step", fg="black", command=Renderer.do_step)
         step_button.pack(side=BOTTOM)
+
         # Canvas set up
         Renderer.canvas = Canvas(Renderer.window, width=Renderer.width * Renderer.scale,
                                  height=Renderer.height * Renderer.scale)
@@ -126,38 +177,52 @@ class Renderer:
                 if pair[0] not in Renderer.inspected:
                     Renderer.render_nodes[pair[0]].examined = True
                     Renderer.inspected.append(pair[0])
+            Renderer.print_labels(queue)
             Renderer.inspected = new_inspects
         else:
             Renderer.render_nodes[len(Renderer.render_nodes) - 1].visited = True
             Renderer.render_nodes[len(Renderer.render_nodes) - 1].selected = True
             for node_id in Solver.get_path():
                 Renderer.render_nodes[node_id].selected = True
+            Renderer.labels[0].config(text="FINISHED")
+            Renderer.labels[1].config(text="Total distance:")
+            Renderer.labels[2].config(text=str(round(Solver.distance, 2)))
+            Renderer.labels[3].config(text="")
+            Renderer.labels[3].config(text="")
+        Renderer.draw_nodes()
+
+    @staticmethod
+    def draw_nodes():
         for node in Renderer.render_nodes:
             Renderer.draw_node(Renderer.canvas, node)
 
     @staticmethod
     def draw_node(canvas, render_node):
         assert type(render_node) is RenderNode, "not a render node"
+        rad = Renderer.oval_radius
         if render_node.oval == -1:
             x = (render_node.loc[0] + Renderer.min_x) * Renderer.scale
             y = (Renderer.height - (render_node.loc[1] + Renderer.min_y)) * Renderer.scale
-            render_node.oval = canvas.create_oval(x - 5, y - 5, x + 5, y + 5)
-        if render_node.examined:
-            canvas.itemconfig(render_node.oval, fill="#66c2ff")
-        if render_node.visited:
-            canvas.itemconfig(render_node.oval, fill="#0044cc")
-        if render_node.selected:
-            canvas.itemconfig(render_node.oval, fill="#ff8c1a")
-        if render_node.start:
-            if render_node.selected:
-                canvas.itemconfig(render_node.oval, fill="#66ff66")
-            else:
-                canvas.itemconfig(render_node.oval, fill="#2eb82e")
+            render_node.oval = canvas.create_oval(x - rad, y - rad, x + rad, y + rad, fill="#ffffff")
+            canvas.create_text(x, y, text=str(render_node.id + 1))
         if render_node.goal:
             if render_node.selected:
                 canvas.itemconfig(render_node.oval, fill="#ff3311")
             else:
                 canvas.itemconfig(render_node.oval, fill="#cc0000")
+        elif render_node.start:
+            if render_node.selected:
+                canvas.itemconfig(render_node.oval, fill="#66ff66")
+            else:
+                canvas.itemconfig(render_node.oval, fill="#2eb82e")
+        elif render_node.selected:
+            canvas.itemconfig(render_node.oval, fill="#ff8c1a")
+        elif render_node.visited:
+            canvas.itemconfig(render_node.oval, fill="#0044cc")
+        elif render_node.examined:
+            canvas.itemconfig(render_node.oval, fill="#66c2ff")
+        else:
+            canvas.itemconfig(render_node.oval, fill="#ffffff")
 
     @staticmethod
     def draw_links(canvas, link):
@@ -172,11 +237,22 @@ class Renderer:
         canvas.create_line(start[0], start[1], end[0], end[1], arrow=LAST)
 
     @staticmethod
+    def print_labels(queue):
+        for i in range(5):
+            if i >= len(queue):
+                Renderer.labels[i].config(text="")
+            else:
+                lab = "Node: " + str(queue[i][0] + 1) + ", Distance: " + str(round(queue[i][1], 2))
+                Renderer.labels[i].config(text=lab)
+
+
+    @staticmethod
     def arrow_reduction(start, end):
         direction = [end[0] - start[0], end[1] - start[1]]
         direction = Renderer.normalise(direction)
-        start = [start[0] + direction[0] * 5, start[1] + direction[1] * 5]
-        end = [end[0] - direction[0] * 5, end[1] - direction[1] * 5]
+        rad = Renderer.oval_radius
+        start = [start[0] + direction[0] * rad, start[1] + direction[1] * rad]
+        end = [end[0] - direction[0] * rad, end[1] - direction[1] * rad]
         return start, end
 
     @staticmethod

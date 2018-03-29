@@ -25,4 +25,4 @@ for n in GraphMaker.nodes:
 #
 # Solver.initialise_solver(GraphMaker.nodes)
 
-renderer = Renderer()
+Renderer.render_graph()
