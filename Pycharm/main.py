@@ -6,7 +6,7 @@ from Renderer import Renderer
 # run program
 # print("Hello world.")
 this_dir = os.path.dirname(os.path.realpath(__file__))
-fi = FileInput.do_file_input(this_dir, 4)
+FileInput.do_file_input(this_dir, 4)
 GraphMaker.build_nodes()
 GraphMaker.build_connections()
 # for n in GraphMaker.nodes:
