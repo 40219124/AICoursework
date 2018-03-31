@@ -105,7 +105,7 @@ class Renderer:
 
         # Window set up
         Renderer.window.title("Graph Solver")
-        Renderer.window.geometry(str(Renderer.width * Renderer.scale + 270) + "x" +
+        Renderer.window.geometry(str(Renderer.width * Renderer.scale + 320) + "x" +
                                  str(Renderer.height * Renderer.scale + 100))
 
         # Queue frame set up
@@ -280,7 +280,9 @@ class Renderer:
             if i >= len(queue):
                 Renderer.labels[i].config(text="")
             else:
-                lab = "Node: " + str(queue[i][0] + 1) + ", Distance: " + str(round(queue[i][1], 2))
+                lab = "Node: " + str(queue[i][0] + 1) + ", From: " + \
+                      str(Solver.solver_nodes[queue[i][0]].visited_from + 1) + \
+                      ", Distance: " + str(round(queue[i][1], 2))
                 Renderer.labels[i].config(text=lab)
         if len(queue) > list_length:
             Renderer.labels[list_length - 1].config(text="+" + str(len(queue) - (list_length - 1)) + " more...")
