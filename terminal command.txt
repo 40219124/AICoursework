@@ -1,3 +1,4 @@
-C:\ProgramData\Anaconda3\python.exe C:\Users\tssan\Documents\AICoursework\Pycharm\main.py
-
+D:\ProgramData\Anaconda3\python.exe C:\Users\tssan\Documents\AICoursework\Pycharm\main.py
 this command works on my surface
+D:\ProgramData\Anaconda3\python.exe C:\Users\Tim\Documents\AICoursework\Pycharm\main.py
+this command works on my desktop
